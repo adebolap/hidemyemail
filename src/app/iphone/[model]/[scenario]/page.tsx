@@ -5,14 +5,19 @@ import { RecommendationResultView } from "@/components/RecommendationResultView"
 import {
   getAccessoriesByTags,
   getAppsByTags,
+  getComparisonsForRecommendation,
+  getLeadMagnet,
   getModelBySlug,
+  getProductsForScenario,
   getPublishedModels,
   getRelatedGuides,
   getScenarioBySlug,
   getScenarios,
   getSourceById,
   isIndexableStatus,
+  resolveCheckoutUrl,
 } from "@/lib/content";
+import { CURRENT_TARGET_IOS } from "@/lib/freshness";
 import { getRecommendation } from "@/lib/recommendation-engine";
 import {
   articleJsonLd,
@@ -105,6 +110,16 @@ export default async function ModelScenarioPage({ params, searchParams }: Props)
 
   const accessories = getAccessoriesByTags(result.primary.accessoryTags);
   const apps = getAppsByTags(result.primary.appTags);
+  const comparisons = getComparisonsForRecommendation(
+    result.primary.id,
+    scenario.id,
+    model.id,
+  );
+  const products = getProductsForScenario(scenario.id).map((product) => ({
+    ...product,
+    resolvedCheckoutUrl: resolveCheckoutUrl(product),
+  }));
+  const leadMagnet = getLeadMagnet();
   const relatedGuides = getRelatedGuides(
     [
       ...scenario.relatedGuideSlugs,
@@ -168,6 +183,10 @@ export default async function ModelScenarioPage({ params, searchParams }: Props)
         apps={apps}
         relatedGuides={relatedGuides}
         sharePath={sharePath}
+        comparisons={comparisons}
+        products={products}
+        leadMagnet={leadMagnet}
+        testedIOS={CURRENT_TARGET_IOS}
       />
       <p className="mt-10 text-sm text-ink-muted">
         Hub:{" "}

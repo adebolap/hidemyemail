@@ -1,6 +1,8 @@
 import { accessories, recommendedApps } from "@/../content/accessories";
+import { comparisons, comparisonsBySlug } from "@/../content/comparisons";
 import { guides, guidesBySlug } from "@/../content/guides";
 import { models, modelsById, modelsBySlug } from "@/../content/models";
+import { digitalProducts, digitalProductsBySlug } from "@/../content/products";
 import { recommendations } from "@/../content/recommendations";
 import {
   lightingOptions,
@@ -11,6 +13,8 @@ import {
 } from "@/../content/scenarios";
 import { sources, sourcesById } from "@/../content/sources";
 import type {
+  Comparison,
+  DigitalProduct,
   Guide,
   IPhoneModel,
   Recommendation,
@@ -108,4 +112,62 @@ export function getRelatedGuides(slugs: string[], limit = 4): Guide[] {
 
 export function isIndexableStatus(status: string): boolean {
   return status === "published" || status === "reviewed";
+}
+
+export function getComparisons(): Comparison[] {
+  return comparisons;
+}
+
+export function getPublishedComparisons(): Comparison[] {
+  return comparisons.filter((c) => isIndexableStatus(c.status));
+}
+
+export function getComparisonBySlug(slug: string): Comparison | undefined {
+  return comparisonsBySlug[slug];
+}
+
+export function getComparisonsForRecommendation(
+  recommendationId: string,
+  scenarioId?: string,
+  modelId?: string,
+): Comparison[] {
+  return getPublishedComparisons().filter((c) => {
+    const byRec = c.recommendationIds.includes(recommendationId);
+    const byScenario = scenarioId
+      ? c.scenarioIds.includes(scenarioId)
+      : false;
+    const byModel = modelId ? c.modelIds.includes(modelId) : false;
+    return byRec || (byScenario && (byModel || !modelId));
+  });
+}
+
+export function getDigitalProducts(): DigitalProduct[] {
+  return digitalProducts;
+}
+
+export function getPublishedProducts(): DigitalProduct[] {
+  return digitalProducts.filter((p) => isIndexableStatus(p.status));
+}
+
+export function getProductBySlug(slug: string): DigitalProduct | undefined {
+  return digitalProductsBySlug[slug];
+}
+
+export function getLeadMagnet(): DigitalProduct | undefined {
+  return getPublishedProducts().find((p) => p.leadMagnet);
+}
+
+export function getProductsForScenario(scenarioId: string): DigitalProduct[] {
+  return getPublishedProducts().filter(
+    (p) => !p.leadMagnet && p.scenarioIds.includes(scenarioId),
+  );
+}
+
+export function resolveCheckoutUrl(product: DigitalProduct): string | undefined {
+  if (product.checkoutUrl) return product.checkoutUrl;
+  const map: Record<string, string | undefined> = {
+    "scenario-cheat-sheets": process.env.NEXT_PUBLIC_CHECKOUT_CHEAT_SHEETS,
+    "night-travel-pack": process.env.NEXT_PUBLIC_CHECKOUT_NIGHT_TRAVEL,
+  };
+  return map[product.id];
 }

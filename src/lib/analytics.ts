@@ -10,7 +10,10 @@ export type AnalyticsEvent =
   | "affiliate_clicked"
   | "email_signup_started"
   | "email_signup_completed"
-  | "premium_cta_clicked";
+  | "premium_cta_clicked"
+  | "digital_product_viewed"
+  | "digital_product_clicked"
+  | "lead_magnet_completed";
 
 type EventPayload = Record<string, string | number | boolean | undefined>;
 

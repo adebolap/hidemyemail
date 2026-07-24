@@ -4,6 +4,8 @@ import {
   getScenarios,
   getIndexableRecommendations,
   isIndexableStatus,
+  getPublishedComparisons,
+  getPublishedProducts,
 } from "@/lib/content";
 import { getRecommendation } from "@/lib/recommendation-engine";
 import { absoluteUrl } from "@/lib/seo";
@@ -18,6 +20,8 @@ export default function sitemap() {
     "/privacy",
     "/terms",
     "/affiliate-disclosure",
+    "/comparisons",
+    "/products",
   ].map((path) => ({
     url: absoluteUrl(path || "/"),
     lastModified: new Date("2026-07-15"),
@@ -38,7 +42,16 @@ export default function sitemap() {
     lastModified: new Date(guide.lastVerifiedAt),
   }));
 
-  // Index substantial model-scenario pages that resolve to reviewed content
+  const comparisons = getPublishedComparisons().map((comparison) => ({
+    url: absoluteUrl(`/comparisons/${comparison.slug}`),
+    lastModified: new Date(comparison.lastVerifiedAt),
+  }));
+
+  const products = getPublishedProducts().map((product) => ({
+    url: absoluteUrl(`/products/${product.slug}`),
+    lastModified: new Date(product.lastVerifiedAt),
+  }));
+
   const modelScenario: { url: string; lastModified: Date }[] = [];
   for (const model of getPublishedModels()) {
     for (const scenario of getScenarios()) {
@@ -62,8 +75,15 @@ export default function sitemap() {
     }
   }
 
-  // Ensure we only keep reviewed recommendations conceptually represented
   void getIndexableRecommendations;
 
-  return [...staticRoutes, ...models, ...scenarios, ...guides, ...modelScenario];
+  return [
+    ...staticRoutes,
+    ...models,
+    ...scenarios,
+    ...guides,
+    ...comparisons,
+    ...products,
+    ...modelScenario,
+  ];
 }

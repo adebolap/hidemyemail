@@ -59,6 +59,24 @@ Matching order:
 3. Link at least two related guides where practical.
 4. Visible FAQs may emit `FAQPage` JSON-LD — do not invent FAQs only for schema.
 
+## Add a comparison (owned evidence)
+
+1. Add to `content/comparisons/index.ts`.
+2. Include default vs optimized sides, metrics, `testedIOS`, and Tier 1/2 `sourceIds`.
+3. Link `recommendationIds` / `scenarioIds` so result pages can surface the proof.
+4. Run `npm run validate`.
+
+## Add a digital product
+
+1. Add to `content/products/index.ts`.
+2. Use `leadMagnet: true` for the free cheat sheet email offer.
+3. Set checkout URLs via `NEXT_PUBLIC_CHECKOUT_*` env vars (not hardcoded secrets).
+4. Keep product CTAs after the primary recommendation answer.
+
+## Freshness
+
+`src/lib/freshness.ts` marks records fresh / aging / stale / needs-update from `lastVerifiedAt` and iOS train. Target iOS is `CURRENT_TARGET_IOS`. After major iOS releases, re-verify comparisons and recommendations.
+
 ## Validation rules that fail the check
 
 - Unknown model/scenario/source references

@@ -3,7 +3,19 @@
 import { useState, type FormEvent } from "react";
 import { track } from "@/lib/analytics";
 
-export function NewsletterForm() {
+type Props = {
+  title?: string;
+  description?: string;
+  offerId?: string;
+  compact?: boolean;
+};
+
+export function NewsletterForm({
+  title = "Get new setup guides",
+  description = "Occasional iPhone camera updates — no spam.",
+  offerId,
+  compact = false,
+}: Props) {
   const enabled = process.env.NEXT_PUBLIC_NEWSLETTER_ENABLED !== "false";
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
@@ -28,21 +40,26 @@ export function NewsletterForm() {
       return;
     }
 
-    track("email_signup_started");
+    track("email_signup_started", { offerId });
     setStatus("loading");
     try {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, consent: true }),
+        body: JSON.stringify({ email, consent: true, offerId }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) {
         throw new Error(data.error ?? "Signup failed");
       }
       setStatus("success");
-      setMessage("You’re on the list. Check your inbox for a confirmation.");
-      track("email_signup_completed");
+      setMessage(
+        offerId
+          ? "You’re in — check your inbox for the cheat sheet link."
+          : "You’re on the list. Check your inbox for a confirmation.",
+      );
+      track("email_signup_completed", { offerId });
+      if (offerId) track("lead_magnet_completed", { offerId });
       setEmail("");
       setConsent(false);
     } catch (error) {
@@ -52,14 +69,17 @@ export function NewsletterForm() {
   }
 
   return (
-    <section className="surface p-6" aria-labelledby="newsletter-heading">
+    <section
+      className={compact ? "rounded-[var(--radius)] border border-line bg-bg-elevated p-5" : "surface p-6"}
+      aria-labelledby="newsletter-heading"
+    >
       <h2 id="newsletter-heading" className="text-xl font-semibold">
-        Get new setup guides
+        {title}
       </h2>
       <p className="mt-2 text-sm text-ink-muted">
-        Occasional iPhone camera updates — no spam. Read the{" "}
+        {description}{" "}
         <a href="/privacy" className="text-accent">
-          privacy policy
+          Privacy policy
         </a>
         .
       </p>
@@ -87,14 +107,21 @@ export function NewsletterForm() {
             checked={consent}
             onChange={(e) => setConsent(e.target.checked)}
           />
-          <span>I agree to receive email updates about camera settings and guides.</span>
+          <span>
+            I agree to receive email updates
+            {offerId ? " and the free cheat sheet" : ""}.
+          </span>
         </label>
         <button
           type="submit"
           className="btn btn-primary"
           disabled={status === "loading"}
         >
-          {status === "loading" ? "Subscribing…" : "Subscribe"}
+          {status === "loading"
+            ? "Submitting…"
+            : offerId
+              ? "Send me the cheat sheet"
+              : "Subscribe"}
         </button>
         {message ? (
           <p

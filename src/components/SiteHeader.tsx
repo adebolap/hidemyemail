@@ -2,9 +2,9 @@ import Link from "next/link";
 
 const links = [
   { href: "/#finder", label: "Finder" },
-  { href: "/guides/best-overall-settings", label: "Guides" },
+  { href: "/comparisons", label: "Comparisons" },
+  { href: "/products", label: "Cheat sheets" },
   { href: "/methodology", label: "Methodology" },
-  { href: "/sources", label: "Sources" },
 ];
 
 export function SiteHeader() {

@@ -3,7 +3,11 @@ import { recommendations } from "@/../content/recommendations";
 import { scenarios } from "@/../content/scenarios";
 import { guides } from "@/../content/guides";
 import { sources } from "@/../content/sources";
+import { comparisons } from "@/../content/comparisons";
+import { digitalProducts } from "@/../content/products";
 import {
+  comparisonSchema,
+  digitalProductSchema,
   guideSchema,
   iPhoneModelSchema,
   recommendationSchema,
@@ -193,5 +197,84 @@ export function validateContent(): ValidationIssue[] {
     });
   }
 
+  for (const comparison of comparisons) {
+    const parsed = comparisonSchema.safeParse(comparison);
+    if (!parsed.success) {
+      issues.push({
+        level: "error",
+        message: `Invalid comparison ${comparison.id}: ${parsed.error.message}`,
+      });
+    }
+    for (const mid of comparison.modelIds) {
+      if (!modelIds.has(mid)) {
+        issues.push({
+          level: "error",
+          message: `Comparison ${comparison.id} references unknown model ${mid}`,
+        });
+      }
+    }
+    for (const sid of comparison.scenarioIds) {
+      if (!scenarioIds.has(sid)) {
+        issues.push({
+          level: "error",
+          message: `Comparison ${comparison.id} references unknown scenario ${sid}`,
+        });
+      }
+    }
+    for (const sourceId of comparison.sourceIds) {
+      if (!sourceIds.has(sourceId)) {
+        issues.push({
+          level: "error",
+          message: `Comparison ${comparison.id} references unknown source ${sourceId}`,
+        });
+      }
+    }
+    if (isIndexableStatus(comparison.status) && !comparison.lastVerifiedAt) {
+      issues.push({
+        level: "error",
+        message: `Indexable comparison ${comparison.id} missing lastVerifiedAt`,
+      });
+    }
+  }
+
+  if (getPublishedComparisonCount() < 3) {
+    issues.push({
+      level: "error",
+      message: "Expected at least 3 published comparisons for evidence moat",
+    });
+  }
+
+  for (const product of digitalProducts) {
+    const parsed = digitalProductSchema.safeParse(product);
+    if (!parsed.success) {
+      issues.push({
+        level: "error",
+        message: `Invalid product ${product.id}: ${parsed.error.message}`,
+      });
+    }
+    for (const sid of product.scenarioIds) {
+      if (!scenarioIds.has(sid)) {
+        issues.push({
+          level: "error",
+          message: `Product ${product.id} references unknown scenario ${sid}`,
+        });
+      }
+    }
+  }
+
+  const hasLeadMagnet = digitalProducts.some(
+    (p) => p.leadMagnet && isIndexableStatus(p.status),
+  );
+  if (!hasLeadMagnet) {
+    issues.push({
+      level: "error",
+      message: "Expected at least one published lead-magnet product",
+    });
+  }
+
   return issues;
+}
+
+function getPublishedComparisonCount() {
+  return comparisons.filter((c) => isIndexableStatus(c.status)).length;
 }

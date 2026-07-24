@@ -1,6 +1,8 @@
 import { AccessoryCard } from "@/components/AccessoryCard";
 import { AlternativeRecommendation } from "@/components/AlternativeRecommendation";
+import { ComparisonCard } from "@/components/ComparisonCard";
 import { DesktopActions } from "@/components/DesktopActions";
+import { DigitalProductCard } from "@/components/DigitalProductCard";
 import { EvidenceDrawer } from "@/components/EvidenceDrawer";
 import { CapabilityWarning, TradeoffNotice } from "@/components/Notices";
 import { NewsletterForm } from "@/components/NewsletterForm";
@@ -15,7 +17,14 @@ import { AdSlot } from "@/components/AdSlot";
 import { formatSettingsCopy } from "@/lib/format-settings";
 import { absoluteUrl } from "@/lib/seo";
 import type { EngineResult } from "@/lib/recommendation-engine";
-import type { Accessory, AppRecommendation, Guide, Source } from "@/lib/schemas";
+import type {
+  Accessory,
+  AppRecommendation,
+  Comparison,
+  DigitalProduct,
+  Guide,
+  Source,
+} from "@/lib/schemas";
 
 export function RecommendationResultView({
   modelName,
@@ -25,6 +34,10 @@ export function RecommendationResultView({
   apps,
   relatedGuides,
   sharePath,
+  comparisons = [],
+  products = [],
+  leadMagnet,
+  testedIOS,
 }: {
   modelName: string;
   result: EngineResult;
@@ -33,6 +46,10 @@ export function RecommendationResultView({
   apps: AppRecommendation[];
   relatedGuides: Guide[];
   sharePath: string;
+  comparisons?: Comparison[];
+  products?: Array<DigitalProduct & { resolvedCheckoutUrl?: string }>;
+  leadMagnet?: DigitalProduct;
+  testedIOS?: string;
 }) {
   const copyText = formatSettingsCopy(modelName, result.primary);
   const shareUrl = absoluteUrl(sharePath);
@@ -46,6 +63,7 @@ export function RecommendationResultView({
             recommendation={result.primary}
             modelName={modelName}
             matchType={result.matchType}
+            testedIOS={testedIOS}
           />
           <DesktopActions
             copyText={copyText}
@@ -61,10 +79,54 @@ export function RecommendationResultView({
           <TradeoffNotice mistakes={result.primary.mistakes} />
           <AlternativeRecommendation alternative={result.alternative} />
           <EvidenceDrawer evidence={result.evidence} sources={sources} />
+          {comparisons.length ? (
+            <section aria-labelledby="comparisons-heading" className="space-y-4">
+              <div>
+                <h2 id="comparisons-heading" className="text-xl font-semibold">
+                  Proof from our controlled tests
+                </h2>
+                <p className="mt-1 text-sm text-ink-muted">
+                  Owned before/after comparisons — not recycled tips.
+                </p>
+              </div>
+              {comparisons.slice(0, 2).map((comparison) => (
+                <ComparisonCard
+                  key={comparison.id}
+                  comparison={comparison}
+                  compact
+                />
+              ))}
+            </section>
+          ) : null}
           <RelatedGuides guides={relatedGuides} />
         </div>
         <aside className="space-y-6">
           <AdSlot slot="result-sidebar" />
+          {leadMagnet ? (
+            <NewsletterForm
+              title={leadMagnet.headline}
+              description={leadMagnet.description}
+              offerId={leadMagnet.id}
+              compact
+            />
+          ) : (
+            <NewsletterForm />
+          )}
+          {products.length ? (
+            <section aria-labelledby="products-heading" className="space-y-4">
+              <h2 id="products-heading" className="text-xl font-semibold">
+                Dig deeper
+              </h2>
+              {products.slice(0, 2).map((product) => (
+                <DigitalProductCard
+                  key={product.id}
+                  product={product}
+                  checkoutUrl={product.resolvedCheckoutUrl}
+                  variant="compact"
+                />
+              ))}
+            </section>
+          ) : null}
           {accessories.length ? (
             <section aria-labelledby="accessories-heading">
               <h2 id="accessories-heading" className="mb-3 text-xl font-semibold">
@@ -78,7 +140,6 @@ export function RecommendationResultView({
             </section>
           ) : null}
           <RecommendedApps apps={apps.slice(0, 3)} />
-          <NewsletterForm />
           <PremiumCta />
           <p className="text-xs text-ink-subtle">
             <a href="/affiliate-disclosure" className="text-accent">

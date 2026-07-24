@@ -1,15 +1,18 @@
 import type { Recommendation } from "@/lib/schemas";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { FreshnessBadge } from "@/components/FreshnessBadge";
 import { formatDate } from "@/lib/utils";
 
 export function RecommendationSummary({
   recommendation,
   modelName,
   matchType,
+  testedIOS,
 }: {
   recommendation: Recommendation;
   modelName: string;
   matchType: string;
+  testedIOS?: string;
 }) {
   return (
     <section className="surface p-6 sm:p-8" aria-labelledby="answer-heading">
@@ -25,6 +28,11 @@ export function RecommendationSummary({
       </p>
       <div className="mt-5 flex flex-wrap items-center gap-3">
         <ConfidenceBadge confidence={recommendation.confidence} />
+        <FreshnessBadge
+          lastVerifiedAt={recommendation.lastVerifiedAt}
+          testedIOS={testedIOS}
+          status={recommendation.status}
+        />
         <p className="text-sm text-ink-subtle">
           Verified {formatDate(recommendation.lastVerifiedAt)} · Match:{" "}
           {matchType.replace("-", " ")}

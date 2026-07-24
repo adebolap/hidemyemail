@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -44,6 +45,18 @@ export default function MethodologyPage() {
         Instructions distinguish iOS Settings → Camera, on-screen Camera
         controls, third-party app controls, and automatic computational behavior
         users cannot configure.
+      </p>
+      <h2>Freshness after iOS updates</h2>
+      <p>
+        Recommendations and comparisons show freshness badges against the current
+        target iOS train. When Apple ships material Camera changes, mark affected
+        records <code>needs-update</code>, re-test, then republish.
+      </p>
+      <h2>Owned comparisons</h2>
+      <p>
+        Scenario advice should prefer linked controlled comparisons over generic
+        tips. These before/after records are part of the product moat and live at{" "}
+        <Link href="/comparisons">/comparisons</Link>.
       </p>
     </div>
   );

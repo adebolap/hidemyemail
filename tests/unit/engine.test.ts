@@ -9,6 +9,16 @@ import { recommendations } from "@/../content/recommendations";
 import { sources } from "@/../content/sources";
 import { validateContent } from "@/lib/validate-content";
 import { buildMetadata, absoluteUrl } from "@/lib/seo";
+import {
+  CURRENT_TARGET_IOS,
+  getFreshnessState,
+} from "@/lib/freshness";
+import {
+  getComparisonsForRecommendation,
+  getLeadMagnet,
+  getPublishedComparisons,
+  getPublishedProducts,
+} from "@/lib/content";
 
 describe("recommendation engine", () => {
   it("returns an exact match for 16 Pro night photography", () => {
@@ -69,6 +79,39 @@ describe("content validation", () => {
   it("passes seed content checks", () => {
     const issues = validateContent().filter((i) => i.level === "error");
     expect(issues).toEqual([]);
+  });
+
+  it("includes owned comparisons and a lead magnet", () => {
+    expect(getPublishedComparisons().length).toBeGreaterThanOrEqual(3);
+    expect(getLeadMagnet()?.leadMagnet).toBe(true);
+    expect(getPublishedProducts().some((p) => !p.leadMagnet)).toBe(true);
+  });
+
+  it("links night recommendation to a comparison", () => {
+    const linked = getComparisonsForRecommendation("16pro-night-photo", "night", "iphone-16-pro");
+    expect(linked.length).toBeGreaterThan(0);
+  });
+});
+
+describe("freshness", () => {
+  it("marks recent verifications as fresh on current iOS", () => {
+    expect(
+      getFreshnessState({
+        lastVerifiedAt: "2026-07-10",
+        testedIOS: CURRENT_TARGET_IOS,
+        now: new Date("2026-07-24"),
+      }),
+    ).toBe("fresh");
+  });
+
+  it("flags major iOS train drift as needs-update", () => {
+    expect(
+      getFreshnessState({
+        lastVerifiedAt: "2026-07-10",
+        testedIOS: "17.5",
+        targetIOS: "18.5",
+      }),
+    ).toBe("needs-update");
   });
 });
 

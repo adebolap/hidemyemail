@@ -194,6 +194,62 @@ export const finderInputSchema = z.object({
   outputGoal: z.string(),
 });
 
+export const comparisonSideSchema = z.object({
+  label: z.string(),
+  settingsSummary: z.string(),
+  observations: z.array(z.string()),
+});
+
+export const comparisonSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  description: z.string(),
+  modelIds: z.array(z.string()),
+  scenarioIds: z.array(z.string()),
+  mediaType: mediaTypeSchema,
+  testedIOS: z.string(),
+  lighting: z.string(),
+  defaultSide: comparisonSideSchema,
+  optimizedSide: comparisonSideSchema,
+  winner: z.enum(["default", "optimized", "tie"]),
+  winnerSummary: z.string(),
+  metrics: z.array(
+    z.object({
+      label: z.string(),
+      defaultValue: z.string(),
+      optimizedValue: z.string(),
+      note: z.string().optional(),
+    }),
+  ),
+  sourceIds: z.array(z.string()),
+  recommendationIds: z.array(z.string()).default([]),
+  productTags: z.array(z.string()).default([]),
+  status: editorialStatusSchema,
+  lastVerifiedAt: z.string(),
+  author: z.string().optional(),
+  reviewer: z.string().optional(),
+});
+
+export const digitalProductSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  headline: z.string(),
+  description: z.string(),
+  price: z.string(),
+  priceCents: z.number().int().nonnegative(),
+  currency: z.string().default("USD"),
+  type: z.enum(["cheat-sheet", "preset-pack", "guide", "lead-magnet"]),
+  includes: z.array(z.string()),
+  scenarioIds: z.array(z.string()).default([]),
+  modelFamilyIds: z.array(z.string()).default([]),
+  checkoutUrl: z.string().optional(),
+  leadMagnet: z.boolean().default(false),
+  status: editorialStatusSchema,
+  lastVerifiedAt: z.string(),
+});
+
 export type EditorialStatus = z.infer<typeof editorialStatusSchema>;
 export type Confidence = z.infer<typeof confidenceSchema>;
 export type MediaType = z.infer<typeof mediaTypeSchema>;
@@ -211,3 +267,5 @@ export type Guide = z.infer<typeof guideSchema>;
 export type Accessory = z.infer<typeof accessorySchema>;
 export type AppRecommendation = z.infer<typeof appRecommendationSchema>;
 export type FinderInput = z.infer<typeof finderInputSchema>;
+export type Comparison = z.infer<typeof comparisonSchema>;
+export type DigitalProduct = z.infer<typeof digitalProductSchema>;

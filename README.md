@@ -84,8 +84,11 @@ Set production env vars from `.env.example` before go-live.
 
 - Accessory cards with affiliate or non-affiliate fallback URLs
 - Recommended apps
-- Newsletter form (`/api/newsletter`, mock provider by default)
+- Newsletter form + **free cheat-sheet lead magnet** (`/api/newsletter`, mock provider by default)
+- Paid digital products at `/products` (cheat sheets / packs; checkout via env)
+- Owned comparisons at `/comparisons` (evidence moat for SEO + trust)
 - Layout-stable `AdSlot` regions (disabled until `NEXT_PUBLIC_ADS_ENABLED=true`)
 - Premium “Analyze My Photo” CTA (no uploads in MVP)
+- iOS freshness badges on recommendations and comparisons
 
 Ads and signup prompts never appear before the primary recommendation answer.

@@ -28,9 +28,17 @@ test("copy settings button works", async ({ page, context }) => {
 
 test("newsletter validation states", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("textbox", { name: "Email" }).fill("not-an-email");
-  await page.getByRole("button", { name: /Subscribe/i }).click();
+  await page.getByRole("textbox", { name: "Email" }).first().fill("not-an-email");
+  await page.getByRole("button", { name: /Subscribe|Send me the cheat sheet/i }).first().click();
   await expect(page.getByText(/valid email|agree to receive/i).first()).toBeVisible();
+});
+
+test("lead magnet offer appears on homepage", async ({ page }) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: /Free sheet, paid packs|cheat sheet/i }).first(),
+  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /See our tests|View all/i }).first()).toBeVisible();
 });
 
 test("keyboard can move through finder controls", async ({ page }) => {

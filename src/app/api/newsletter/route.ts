@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let body: { email?: string; consent?: boolean };
+  let body: { email?: string; consent?: boolean; offerId?: string };
   try {
     body = await request.json();
   } catch {
@@ -45,9 +45,10 @@ export async function POST(request: NextRequest) {
   }
 
   const provider = process.env.NEWSLETTER_PROVIDER ?? "mock";
+  const offerId = body.offerId?.slice(0, 80);
 
   if (provider === "mock") {
-    return NextResponse.json({ ok: true, provider: "mock" });
+    return NextResponse.json({ ok: true, provider: "mock", offerId: offerId ?? null });
   }
 
   const apiUrl = process.env.NEWSLETTER_API_URL;
@@ -74,6 +75,7 @@ export async function POST(request: NextRequest) {
         email,
         listId: process.env.NEWSLETTER_LIST_ID,
         consent: true,
+        tags: offerId ? [offerId] : undefined,
       }),
     });
     if (!res.ok) {

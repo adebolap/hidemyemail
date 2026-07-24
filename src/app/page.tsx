@@ -3,12 +3,18 @@ import { SettingsFinder } from "@/components/SettingsFinder";
 import { RelatedGuides } from "@/components/RelatedGuides";
 import { AdSlot } from "@/components/AdSlot";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { ComparisonCard } from "@/components/ComparisonCard";
+import { DigitalProductCard } from "@/components/DigitalProductCard";
 import {
+  getLeadMagnet,
   getLightingOptions,
   getOutputGoals,
+  getPublishedComparisons,
   getPublishedGuides,
   getPublishedModels,
+  getPublishedProducts,
   getScenarios,
+  resolveCheckoutUrl,
 } from "@/lib/content";
 import { buildMetadata } from "@/lib/seo";
 
@@ -25,6 +31,9 @@ export default function HomePage() {
   const lighting = getLightingOptions();
   const outputs = getOutputGoals();
   const guides = getPublishedGuides().slice(0, 4);
+  const comparisons = getPublishedComparisons().slice(0, 2);
+  const leadMagnet = getLeadMagnet();
+  const featuredProduct = getPublishedProducts().find((p) => !p.leadMagnet);
 
   return (
     <div>
@@ -39,15 +48,15 @@ export default function HomePage() {
               Find the best camera settings for your iPhone
             </h1>
             <p className="mt-4 max-w-lg text-base leading-relaxed text-ink-muted sm:text-lg">
-              Model-aware recommendations with exact setup steps, trade-offs, and
-              sourced evidence — usually in under a minute.
+              Model-aware recommendations with exact setup steps, controlled-test
+              proof, and cheat sheets — usually in under a minute.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a href="#finder" className="btn btn-primary no-underline">
                 Start the finder
               </a>
-              <Link href="/methodology" className="btn btn-secondary no-underline">
-                How we verify advice
+              <Link href="/comparisons" className="btn btn-secondary no-underline">
+                See our tests
               </Link>
             </div>
           </div>
@@ -55,14 +64,14 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_45%)]" />
             <div className="relative flex h-full flex-col justify-end p-6 text-white">
               <p className="text-sm uppercase tracking-[0.2em] text-white/80">
-                Knowledge engine
+                Owned evidence
               </p>
               <p className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
-                Settings before ads
+                Tests before tips
               </p>
               <p className="mt-2 max-w-sm text-sm text-white/85">
-                The answer comes first. Accessories, apps, and newsletter offers
-                stay secondary.
+                Recommendations link to controlled comparisons and stay marked
+                fresh against the current iOS train.
               </p>
             </div>
           </div>
@@ -98,6 +107,59 @@ export default function HomePage() {
 
         <AdSlot slot="home-mid" />
 
+        <section className="space-y-4">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Proof</p>
+              <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
+                Controlled comparisons
+              </h2>
+            </div>
+            <Link href="/comparisons" className="text-sm text-accent">
+              View all
+            </Link>
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {comparisons.map((comparison) => (
+              <ComparisonCard
+                key={comparison.id}
+                comparison={comparison}
+                compact
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div>
+            <p className="eyebrow">Upgrade path</p>
+            <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl font-semibold">
+              Free sheet, paid packs
+            </h2>
+            <p className="mt-3 max-w-xl text-ink-muted">
+              Keep the finder free. Monetize with a lead magnet and scenario
+              cheat sheets after the answer — never before it.
+            </p>
+            {featuredProduct ? (
+              <div className="mt-6">
+                <DigitalProductCard
+                  product={featuredProduct}
+                  checkoutUrl={resolveCheckoutUrl(featuredProduct)}
+                />
+              </div>
+            ) : null}
+          </div>
+          {leadMagnet ? (
+            <NewsletterForm
+              title={leadMagnet.headline}
+              description={leadMagnet.description}
+              offerId={leadMagnet.id}
+            />
+          ) : (
+            <NewsletterForm />
+          )}
+        </section>
+
         <section>
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
@@ -128,7 +190,6 @@ export default function HomePage() {
         </section>
 
         <RelatedGuides guides={guides} />
-        <NewsletterForm />
       </div>
     </div>
   );
